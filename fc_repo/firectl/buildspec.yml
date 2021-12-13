@@ -1,0 +1,21 @@
+version: 0.2
+
+env:
+  variables:
+    GO111MODULE: "on"
+    SKIP_INTEG_TEST: "1"
+
+phases:
+  pre_build:
+    commands:
+      - go mod download
+  build:
+    commands:
+      - make test
+      - make release
+artifacts:
+  files:
+    - firectl
+    - firectl.sha256
+  name: firectl
+  discard-paths: yes

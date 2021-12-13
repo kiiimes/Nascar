@@ -1,0 +1,76 @@
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You may
+# not use this file except in compliance with the License. A copy of the
+# License is located at
+#
+# 	http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
+# permissions and limitations under the License.
+
+env:
+  # The CI system uses Debian 10 with go from stable backports:
+  PATH: "/usr/lib/go-1.13/bin:/usr/bin"
+  # Firectl tests will run against this version of firecracker:
+  FIRECRACKER_VERSION: 0.19.0
+  # Firecracker binaries will be installed and run from this directory:
+  BINDIR: "${PWD}-bin"
+  # Perform a clean checkout to ensure symlinks are gone
+  BUILDKITE_CLEAN_CHECKOUT: true
+
+steps:
+  - label: ':go: go mod download'
+    command: 'go mod download'
+    agents:
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE:-default}"
+      distro: "${BUILDKITE_AGENT_META_DATA_DISTRO}"
+      hostname: "${BUILDKITE_AGENT_META_DATA_HOSTNAME}"
+
+
+  # We use a "wait" step here, because Go's module logic freaks out when
+  # multiple go builds are downloading to the same cache.
+  - wait
+
+  # Git history validation happens after the 'wait' step so it happens
+  # in parallel with the subsequent tests and does not prevent them
+  # from running in the event of a validation failure.
+  - label: 'git log validation'
+    command: './.buildkite/logcheck.sh'
+    agents:
+      # This should run in the same queue, but we don't care whether it runs on
+      # the same host.
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE:-default}"
+
+  - label: 'build'
+    command: 'make'
+    agents:
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE:-default}"
+      distro: "${BUILDKITE_AGENT_META_DATA_DISTRO}"
+      hostname: "${BUILDKITE_AGENT_META_DATA_HOSTNAME}"
+
+  - label: 'build static :link:'
+    commands:
+      - 'make STATIC_BINARY=1'
+      - '[[ -f ./firectl ]] && if ldd ./firectl; then echo "dynamic binary"; exit 1; else echo "static binary"; exit 0; fi'
+    agents:
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE:-default}"
+      distro: "${BUILDKITE_AGENT_META_DATA_DISTRO}"
+      hostname: "${BUILDKITE_AGENT_META_DATA_HOSTNAME}"
+
+  - label: ':hammer: tests'
+    commands:
+      # Install firecracker and jailer in a run-specifc PATH. This
+      # ensures that firectl is tested in its common configuration, in
+      # which it isn't explicitly given a path to a binary but uses
+      # PATH resolution to find it.
+      - "mkdir \"${BINDIR}\""
+      - "ln -s -v /usr/local/bin/firecracker-v${FIRECRACKER_VERSION} \"${BINDIR}/firecracker\""
+      - "ln -s -v \"/usr/local/bin/jailer-v${FIRECRACKER_VERSION}\" \"${BINDIR}/jailer\""
+      - "KERNELIMAGE=/var/lib/fc-ci/vmlinux.bin PATH=\"${BINDIR}:${PATH}\" make all test"
+    agents:
+      queue: "${BUILDKITE_AGENT_META_DATA_QUEUE:-default}"
+      distro: "${BUILDKITE_AGENT_META_DATA_DISTRO}"
+      hostname: "${BUILDKITE_AGENT_META_DATA_HOSTNAME}"
