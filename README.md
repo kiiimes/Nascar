@@ -1,15 +1,15 @@
 # Nascar 관련 내용 및 실험 정리
 ## Nascar 과제 내용
-	* microVM은 tap0로 통신을 하고 eth0와 virtio로 구성이 되어 있음. 라즈베리파이에서 tap0와 eth0의 통신 과정에 ip forwarding 오버헤드가 높음. 그래서, microVM에서 tap0를 거치지 않고 바로 우분투 서버로 패킷을 전송할 수 있도록 bypass를 하려고 함. 
-		* IP forwarding은 반복적인 routing table lookup과 netfilter 연산으로 오버헤드가 높음
-		* 동일한 traffic (같은 src/dst 주소)에 대한 반복적인 연산은 비효율적
-		* 오버헤드를 줄여 firecracker의 네트워크 성능을 높이는 것이 목표 
-	* IP forwarding 오버헤드를 줄이기 위해 XDP라는 네트워크 스택을 우회하여 패킷을 보낼 수 있는 오픈 소스를 사용하여 바로 microVM에서 우분투로 패킷 전송을 하려 함.
-		* xdp_router 코드에서 bpf_fbi_lookup을 통해 얻은 정보로 패킷의 spac과 dmac을 수정하여 bpf_redirect_map을 호출하는 과정을 xdp에서 알아서 해줌 ( 이 과정에서 라우팅 테이블 수정 없었음 ) 
-		* 전체적인 과정을 그림으로 나타내면 아래의 그림과 같음
+* microVM은 tap0로 통신을 하고 eth0와 virtio로 구성이 되어 있음. 라즈베리파이에서 tap0와 eth0의 통신 과정에 ip forwarding 오버헤드가 높음. 그래서, microVM에서 tap0를 거치지 않고 바로 우분투 서버로 패킷을 전송할 수 있도록 bypass를 하려고 함. 
+	* IP forwarding은 반복적인 routing table lookup과 netfilter 연산으로 오버헤드가 높음
+	* 동일한 traffic (같은 src/dst 주소)에 대한 반복적인 연산은 비효율적
+	* 오버헤드를 줄여 firecracker의 네트워크 성능을 높이는 것이 목표 
+* IP forwarding 오버헤드를 줄이기 위해 XDP라는 네트워크 스택을 우회하여 패킷을 보낼 수 있는 오픈 소스를 사용하여 바로 microVM에서 우분투로 패킷 전송을 하려 함.
+	* xdp_router 코드에서 bpf_fbi_lookup을 통해 얻은 정보로 패킷의 spac과 dmac을 수정하여 bpf_redirect_map을 호출하는 과정을 xdp에서 알아서 해줌 ( 이 과정에서 라우팅 테이블 수정 없었음 ) 
+	* 전체적인 과정을 그림으로 나타내면 아래의 그림과 같음
 [image:99BF296F-5545-42A9-B87A-BF1B209C40BF-2695-0000418581388309/202E6CE8-80C2-402B-9C95-5459C9CA8FBE.png]
-	* 실험은 64B TCP packet을 기준으로 진행
-		* 차량용으로 firecracker를 이용하려는 것이기 때문에 메시지 크기가 작은 경우가 주 타겟
+* 실험은 64B TCP packet을 기준으로 진행
+	* 차량용으로 firecracker를 이용하려는 것이기 때문에 메시지 크기가 작은 경우가 주 타겟
 
 ## 실험 환경 세팅
 * 10번 서버(10.0.0.200) 디렉토리 -> /home/fire/eskim/firecracker/fc_repo
