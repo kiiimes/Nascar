@@ -32,7 +32,8 @@ releases/download/${version}/firecracker-${version}-aarch64.tgz
 #server - arm
 wget https://github.com/firecracker-microvm/firecracker/\
 releases/download/${version}/firecracker-${version}-x86_64.tgz
-```* firecracker, jailer 실행파일 생성됨
+```
+* firecracker, jailer 실행파일 생성됨
 
 * firectl 설치 및 빌드(firecracker microvm을 실행할 수 있는 커맨드 라인 툴)
 ```
@@ -105,22 +106,22 @@ mount -t bpf bpf /sys/fs/bpf
 sudo ./xdp_loader -d tap0 -S --filename xdp_prog_kern_03.o --progsec xdp_router -F
 sudo ./xdp_prog_user -d tap0
 ```
-		* tap0에만 붙여도 xdp 실행 가능함 
-			* -S : generic mode -> -N으로 옵션 주면 Native mode
-				* generic mode는 유저 프로그램 형식으로 NIC에 붙이는 형태 
-				* native mode는 커널 4.후반대 이상에서 지원하는 데 커널에서 이미 빌드되어 있는 형태
-				* tap0는 virtual interface라 generic mode로 해야됨
-		* xdp_loader, xdp_user 둘 다 붙여줘야함. xdp_user에서 redirect map 관리 
-		* tap0에 대해 tso 옵션을 꺼줘야함.
-			* tso (tcp segment offload) 옵션은 NIC에서 큰 데이터 청크를 TCP 세그먼트로 나누어서 전송하도록 하는 옵션인데, 이 옵션을 키면 xdp의 redirect 동작에 영향을 미치는 것으로 판단됨 
-				* 그 이유는 xdp를 이용해서 netperf 패킷을 주고 받을 때 src가 microvm, dest microvm 외부 NIC 주소로 되어야 하는데 tso 옵션을 끄지 않으면 일부 패킷의 src 주소가 외부 NIC으로 바뀌면서 microvm에서 패킷 수신을 하지 못함
-				* tso 옵션을 끄면 NIC에서 하던 데이터 청크 세분화 작업을 cpu에서 할 수 있음
-			* microvm 외부 (호스트 서버)
-				* ethtool -K tap0 tso off
-			* microvm 내부 (firecracker 내부)
-				* ethtool -K eth0 tso off
-			* firecracker를 켜고 설정해야 함
-				* ethtool -k [네트워크 인터페이스] 를 이용하여 제대로 옵션이 꺼졌는지 확인 가능
+* tap0에만 붙여도 xdp 실행 가능함 
+	* -S : generic mode -> -N으로 옵션 주면 Native mode
+		* generic mode는 유저 프로그램 형식으로 NIC에 붙이는 형태 
+		* native mode는 커널 4.후반대 이상에서 지원하는 데 커널에서 이미 빌드되어 있는 형태
+		* tap0는 virtual interface라 generic mode로 해야됨
+* xdp_loader, xdp_user 둘 다 붙여줘야함. xdp_user에서 redirect map 관리 
+* tap0에 대해 tso 옵션을 꺼줘야함.
+	* tso (tcp segment offload) 옵션은 NIC에서 큰 데이터 청크를 TCP 세그먼트로 나누어서 전송하도록 하는 옵션인데, 이 옵션을 키면 xdp의 redirect 동작에 영향을 미치는 것으로 판단됨 
+		* 그 이유는 xdp를 이용해서 netperf 패킷을 주고 받을 때 src가 microvm, dest microvm 외부 NIC 주소로 되어야 하는데 tso 옵션을 끄지 않으면 일부 패킷의 src 주소가 외부 NIC으로 바뀌면서 microvm에서 패킷 수신을 하지 못함
+		* tso 옵션을 끄면 NIC에서 하던 데이터 청크 세분화 작업을 cpu에서 할 수 있음
+	* microvm 외부 (호스트 서버)
+		* ethtool -K tap0 tso off
+	* microvm 내부 (firecracker 내부)
+		* ethtool -K eth0 tso off
+	* firecracker를 켜고 설정해야 함
+		* ethtool -k [네트워크 인터페이스] 를 이용하여 제대로 옵션이 꺼졌는지 확인 가능
 * microvm 내부에서 netperf 실행 [firecracker 실험 방법과 동일]
 	* sh  run_host.sh
 		* 4개의 netperf thread를 실행하고, 64B or 16KB로 실험 진행 
@@ -150,8 +151,9 @@ docker update --cpus [CPU 수] kata_expe
 docker restart kata_expe
 docker exec -it kata_expe /bin/bash
 ```
-	* CPU core가 제대로 설정되었는지 확인하고 싶으면 아래의 커맨드를 실행시켜 Nanocpus 부분을 확인하면 됨
+* CPU core가 제대로 설정되었는지 확인하고 싶으면 아래의 커맨드를 실행시켜 Nanocpus 부분을 확인하면 됨
 	`docker inspect kata_expe`
+
 * kata 실험 스크립트 실행
 	* 스크립트 위치 : kata container 내부 -> cd ~/eskim
 	* sh run_host.sh -> netperf 실행 후 결과 저장 및 kata container 외부에서 run_host_container.sh 실행 [container 내부, 호스트 서버에서 성능 측정]
