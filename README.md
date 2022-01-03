@@ -33,8 +33,9 @@ releases/download/${version}/firecracker-${version}-aarch64.tgz
 wget https://github.com/firecracker-microvm/firecracker/\
 releases/download/${version}/firecracker-${version}-x86_64.tgz
 ```
-		* firecracker, jailer 실행파일 생성됨
-	* firectl 설치 및 빌드(firecracker microvm을 실행할 수 있는 커맨드 라인 툴)
+* firecracker, jailer 실행파일 생성됨
+
+* firectl 설치 및 빌드(firecracker microvm을 실행할 수 있는 커맨드 라인 툴)
 ```
 wget https://golang.org/dl/go1.14.12.linux-arm64.tar.gz
 tar xzvf go1.14.12.linux-arm64.tar.gz
@@ -45,11 +46,11 @@ cd firectl/
 wget https://s3.amazonaws.com/spec.ccfc.min/img/aarch64 or x86_64/ubuntu_with_ssh/kernel/vmlinux.bin
 wget https://s3.amazonaws.com/spec.ccfc.min/img/aarch64 or x86_64/ubuntu_with_ssh/fsfiles/xenial.rootfs.ext4
 ```
-		* 각 커널 이미지 파일 및 우분투 이미지는 여러가지가 있으니 용도에 따라 찾아서 설치
-		* 사용 커널 이미지 : v4.14/vmlinux.bin
-		* 사용 우분투 이미지 :  xenial.rootfs.ext4 -> vnstat, pidstat, mpstat, vim, netperf 등의 툴 설치 필요
-	* 네트워크 인터페이스에 tap0 생성
-		* sh host_net.sh 
+* 각 커널 이미지 파일 및 우분투 이미지는 여러가지가 있으니 용도에 따라 찾아서 설치
+	* 사용 커널 이미지 : v4.14/vmlinux.bin
+	* 사용 우분투 이미지 :  xenial.rootfs.ext4 -> vnstat, pidstat, mpstat, vim, netperf 등의 툴 설치 필요
+* 네트워크 인터페이스에 tap0 생성
+	* sh host_net.sh 
 
 ## firecracker 실험 방법 - 10번 서버 기준
 * 먼저, netperf 실험을 위해 받는 쪽 서버(1번 서버 [10.0.0.25] )에 netserver 실행 및 라우팅 설정 
