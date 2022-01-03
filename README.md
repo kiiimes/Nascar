@@ -32,8 +32,7 @@ releases/download/${version}/firecracker-${version}-aarch64.tgz
 #server - arm
 wget https://github.com/firecracker-microvm/firecracker/\
 releases/download/${version}/firecracker-${version}-x86_64.tgz
-```
-* firecracker, jailer 실행파일 생성됨
+```* firecracker, jailer 실행파일 생성됨
 
 * firectl 설치 및 빌드(firecracker microvm을 실행할 수 있는 커맨드 라인 툴)
 ```
