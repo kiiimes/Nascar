@@ -7,7 +7,7 @@
 * IP forwarding 오버헤드를 줄이기 위해 XDP라는 네트워크 스택을 우회하여 패킷을 보낼 수 있는 오픈 소스를 사용하여 바로 microVM에서 우분투로 패킷 전송을 하려 함.
 	* xdp_router 코드에서 bpf_fbi_lookup을 통해 얻은 정보로 패킷의 spac과 dmac을 수정하여 bpf_redirect_map을 호출하는 과정을 xdp에서 알아서 해줌 ( 이 과정에서 라우팅 테이블 수정 없었음 ) 
 	* 전체적인 과정을 그림으로 나타내면 아래의 그림과 같음
-[image:99BF296F-5545-42A9-B87A-BF1B209C40BF-2695-0000418581388309/202E6CE8-80C2-402B-9C95-5459C9CA8FBE.png]
+![202E6CE8-80C2-402B-9C95-5459C9CA8FBE](https://user-images.githubusercontent.com/28219985/147913603-1a8ec97a-43b6-49b7-8252-26b4ca1c4633.png)
 * 실험은 64B TCP packet을 기준으로 진행
 	* 차량용으로 firecracker를 이용하려는 것이기 때문에 메시지 크기가 작은 경우가 주 타겟
 
@@ -186,7 +186,7 @@ docker exec -it kata_expe /bin/bash
 * xdp 디렉토리 : /home/oslab/eskim/xdp-tutorial/packet-solutions
 * 서버에서 xdp를 적용할 때처럼 git clone 해서 xdp 설치 및 빌드를 진행
 * 빌드시 에러 발생할 수 있음
-[image:80E26D09-28E8-4E4C-B8EF-4D3CBEACC516-2695-00005D62E760E43B/BF21C775-694C-4EA5-B019-936AF6165366.png]
+![BF21C775-694C-4EA5-B019-936AF6165366](https://user-images.githubusercontent.com/28219985/147913617-6ac78aa8-46bb-4754-a84f-1c899e46e866.png)
 * 이런 상황 발생시 asm 라이브러리가 존재하는 디렉토리에 대해 심볼릭 링크를 걸어주면 해결 가능
 	* cd /usr/include
 	* ln -s [asm 라이브라리가 있는 디렉토리] asm 
@@ -212,14 +212,14 @@ docker exec -it kata_expe /bin/bash
 	* xdp_firecracker가 kata에 비해 60% 낮은 CPU 사용량으로 네트워크 성능을 38% 개선
 	* 네트워크 처리량은 xdp_fc (889 Mbps) > kata (551 Mbps) > default_fc (490 Mbps)
 	* CPU 사용량은 kata (643 %) > xdp_fc (401 %) > default_fc (322 %) 입니다. 
-[image:5B468C3C-D5B3-447F-A158-547C578499B4-2695-00005FB8195B075A/303B17FA-55C2-4490-AC32-574C1327C5AB.png]
+![303B17FA-55C2-4490-AC32-574C1327C5AB](https://user-images.githubusercontent.com/28219985/147913624-0fdf7589-bf52-47b6-9e70-5194ee2ba127.png)
 
 * 라즈베리파이 실험 데이터 : /home/oslab/eskim/results/1cores,2cores,4cores/fc,xdp_16KB,64B_1thread,2thread
 	* fc_16KB_1thread : firecracker에서 netperf thread 1개로 16KB TCP packet을 전송
 	* xdp_64B_2thread : xdp를 NIC에 붙인 상태에서 firecracker에서 netperf thread 2개로 64B TCP packet을 전송
 * 라즈베리파이 실험 결과 
-[image:164C20FC-623B-4E99-B837-83F1E0682212-2695-00005F1303B3120B/F346ED72-F062-4C1A-87C1-045544E6A0A7.png]
-[image:4CDE08EB-C3D6-4282-9045-A5D053B60895-2695-00005F13DC3C3D4B/A9BD5FF9-ACA1-43A7-8EBA-CA7288B4338C.png]
+![F346ED72-F062-4C1A-87C1-045544E6A0A7](https://user-images.githubusercontent.com/28219985/147913646-9726af81-f6f4-4fc1-91b1-bfcd7c8474b8.png)
+![A9BD5FF9-ACA1-43A7-8EBA-CA7288B4338C](https://user-images.githubusercontent.com/28219985/147913651-bcf0fe8c-5088-45a6-8f7a-76b031c09e07.png)
 	* 64B, 16KB 일 때 2core를 사용하는 경우를 제외한 모든 경우에서 xdp가 더 높은 성능을 보임. 
 	* [64B] xdp 적용을 했을 시 network throughput이 1core_1thread (46% 증가) > 4core_2thread (10% 증가) > 2core_2thread (16% 감소) > 2core_1thread (35% 감소)
 	* [16KB] xdp 적용을 했을 시 network throughput이 1core_1thread (80% 증가) > 4core_2thread (75% 증가) > 2core_2thread (34% 감소) > 2core_1thread (45% 감소)
